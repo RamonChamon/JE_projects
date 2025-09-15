@@ -1,3 +1,5 @@
+from flask import send_from_directory
+import os
 from flask import Flask, jsonify
 import requests
 from bs4 import BeautifulSoup
@@ -16,5 +18,12 @@ def get_quote():
 
     return jsonify({"quote": quote})
 
+@app.route("/")
+def home():
+    return send_from_directory("../frontend", "index.html")
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
