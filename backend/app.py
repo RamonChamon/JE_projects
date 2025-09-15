@@ -7,27 +7,24 @@ app = Flask(__name__)
 
 @app.route("/quote")
 def get_quote():
-    # 1. Alle hoofdstukken ophalen
-    chapters_url = "https://escriva.org/api/v1/books/camino/chapters?lang=en"
-    chapters_resp = requests.get(chapters_url)
-    chapters = chapters_resp.json()
+    # 1. Haal hoofdstukken op van The Way (book_id=12)
+    chapters_url = "https://escriva.org/api/v1/chapters?book_id=12&lang=en"
+    chapters = requests.get(chapters_url).json()["results"]
 
-    # Kies random hoofdstuk
+    # 2. Kies random hoofdstuk
     chapter = random.choice(chapters)
     chapter_id = chapter["id"]
 
-    # 2. Paragrafen uit dit hoofdstuk halen
-    chapter_url = f"https://escriva.org/api/v1/books/camino/chapters/{chapter_id}?lang=en"
-    chapter_resp = requests.get(chapter_url)
-    chapter_data = chapter_resp.json()
+    # 3. Haal paragrafen (points) op van dit hoofdstuk
+    points_url = f"https://escriva.org/api/v1/points?chapter_id={chapter_id}&lang=en"
+    points = requests.get(points_url).json()["results"]
 
-    # 3. Kies random paragraaf (text veld)
-    paragraphs = chapter_data.get("paragraphs", [])
-    if not paragraphs:
-        return jsonify({"quote": "No paragraphs found."})
+    if not points:
+        return jsonify({"quote": "No quotes found."})
 
-    random_paragraph = random.choice(paragraphs).get("text", "No quote found.")
-    return jsonify({"quote": random_paragraph})
+    # 4. Kies random paragraaf
+    random_point = random.choice(points)
+    return jsonify({"quote": random_point.get("text", "No quote found.")})
 
 @app.route("/")
 def home():
