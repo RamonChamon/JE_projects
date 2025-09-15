@@ -1,6 +1,5 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify
 import requests
-from bs4 import BeautifulSoup
 import random
 import os
 
@@ -8,21 +7,31 @@ app = Flask(__name__)
 
 @app.route("/quote")
 def get_quote():
-    url = "https://escriva.org/en/book/the-way/"
-    r = requests.get(url)
-    soup = BeautifulSoup(r.text, "html.parser")
+    # 1. Alle hoofdstukken ophalen
+    chapters_url = "https://escriva.org/api/v1/books/camino/chapters?lang=en"
+    chapters_resp = requests.get(chapters_url)
+    chapters = chapters_resp.json()
 
-    paragraphs = soup.find_all("p")  # later scherper maken met juiste class
+    # Kies random hoofdstuk
+    chapter = random.choice(chapters)
+    chapter_id = chapter["id"]
+
+    # 2. Paragrafen uit dit hoofdstuk halen
+    chapter_url = f"https://escriva.org/api/v1/books/camino/chapters/{chapter_id}?lang=en"
+    chapter_resp = requests.get(chapter_url)
+    chapter_data = chapter_resp.json()
+
+    # 3. Kies random paragraaf (text veld)
+    paragraphs = chapter_data.get("paragraphs", [])
     if not paragraphs:
-        return jsonify({"quote": "No quotes found on escriva.org"})
+        return jsonify({"quote": "No paragraphs found."})
 
-    random_paragraph = random.choice(paragraphs).get_text(strip=True)
+    random_paragraph = random.choice(paragraphs).get("text", "No quote found.")
     return jsonify({"quote": random_paragraph})
 
 @app.route("/")
 def home():
-    # dit zoekt in de map ../frontend naar index.html
-    return send_from_directory("../frontend", "index.html")
+    return app.send_static_file("../frontend/index.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
