@@ -1,29 +1,29 @@
-from flask import send_from_directory
-import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 import requests
 from bs4 import BeautifulSoup
+import random
+import os
 
 app = Flask(__name__)
 
 @app.route("/quote")
 def get_quote():
-    url = "https://www.escriva.org/en/quote-of-the-day"
+    url = "https://escriva.org/en/book/the-way/"
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
 
-    # Let op: de class kan verschillen afhankelijk van de site
-    quote_element = soup.find("div", class_="quote")
-    quote = quote_element.get_text(strip=True) if quote_element else "No quote found."
+    paragraphs = soup.find_all("p")  # later scherper maken met juiste class
+    if not paragraphs:
+        return jsonify({"quote": "No quotes found on escriva.org"})
 
-    return jsonify({"quote": quote})
+    random_paragraph = random.choice(paragraphs).get_text(strip=True)
+    return jsonify({"quote": random_paragraph})
 
 @app.route("/")
 def home():
+    # dit zoekt in de map ../frontend naar index.html
     return send_from_directory("../frontend", "index.html")
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
