@@ -11,13 +11,14 @@
   <button onclick="getQuote()">Get Quote</button>
 
   <script>
-  async function getQuote() {
-    const response = await fetch("/quote");
-    const data = await response.json();
+    async function getQuote() {
+      const response = await fetch("/quote");
+      const data = await response.json();
 
-    // Gebruik innerHTML in plaats van innerText zodat <p> wordt gerenderd
-    document.getElementById("quote-box").innerHTML = data.quote;
-  }
-</script>
+      // Show quote + book name + point number
+      document.getElementById("quote-box").innerText =
+        `"${data.quote}"\n\n— ${data.book}, point ${data.number}`;
+    }
+  </script>
 </body>
 </html>
