@@ -15,8 +15,11 @@
     const response = await fetch("/quote");
     const data = await response.json();
 
-    document.getElementById("quote-box").innerHTML =
-      `"${data.quote}"<br><br>— ${data.book}, point ${data.number} <a href="${data.url}" target="_blank">[source]</a>`;
+    document.getElementById("quote-box").innerHTML = `
+      <p>"${data.quote}"</p>
+      <p>— ${data.book}, point ${data.number} 
+      <a href="${data.url}" target="_blank">[source]</a></p>
+    `;
   }
 </script>
 
